@@ -1,9 +1,13 @@
-
+import connection from "../db.js";
 
 const index = (req, res) => {
 
-    const result = "risposta da index"
-    res.json(result)
+    const sql = 'SELECT * FROM movies';
+
+    connection.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database query failed' });
+        res.json(results);
+    });
 
 }
 
