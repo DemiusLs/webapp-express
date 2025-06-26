@@ -2,7 +2,7 @@ import connection from "../db.js";
 
 const index = (req, res) => {
 
-    
+
 
     const sql = `SELECT movies.* , ROUND(AVG(reviews.vote) , 2) AS avg_vote FROM movies 
     LEFT JOIN  reviews ON movies.id = reviews.movie_id GROUP BY movies.id`;
@@ -10,11 +10,11 @@ const index = (req, res) => {
     connection.query(sql, (err, results) => {
 
         const movies = results.map((curMovie) => {
-            const imgName = `${req.imagePath}${curMovie.title.toLowerCase().replace(" " , "_")}.jpg`
-            
+            const imgstringPath = `${req.imagePath}${curMovie.title.toLowerCase().replace(" ", "_")}.jpg`
+
             return {
                 ...curMovie,
-                image: `${imgName}`
+                image: `${imgstringPath}`
             }
         })
 
@@ -32,19 +32,20 @@ const show = (req, res) => {
 
     connection.query(sqlMovies, [id], (err, moviesResults) => {
 
-        const imgName = `${req.imagePath}${curMovie.title.toLowerCase().replace(" " , "_")}.jpg`
+
 
         if (err) return res.status(500).json({ error: 'Database query failed' });
         if (moviesResults.length === 0) {
             return res.status(404).json({ error: 'Movie not found' });
         } else {
+            const imgstringPath = `${req.imagePath}${moviesResults[0].title.toLowerCase().replace(" ", "_")}.jpg`
             connection.query(sqlReview, [id], (err, reviewsResults) => {
 
-                console.log(reviewsResults)
+
                 res.json({
                     data: {
                         ...moviesResults[0],
-                        
+                        image: imgstringPath,
                         reviews: reviewsResults,
                     },
                 });
