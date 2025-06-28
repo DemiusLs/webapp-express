@@ -10,11 +10,9 @@ const index = (req, res) => {
     connection.query(sql, (err, results) => {
 
         const movies = results.map((curMovie) => {
-            const imgstringPath = `${req.imagePath}${curMovie.title.toLowerCase().replace(" ", "_")}.jpg`
-
             return {
                 ...curMovie,
-                image: `${imgstringPath}`
+                image: `${req.imagePath}${curMovie.image}`
             }
         })
 
@@ -27,8 +25,9 @@ const index = (req, res) => {
 const show = (req, res) => {
 
     const id = req.params.id
-    const sqlMovies = 'SELECT * FROM movies WHERE id= ?';
-    const sqlReview = 'SELECT * FROM reviews WHERE id= ?';
+    const sqlMovies = `SELECT movies.* , ROUND(AVG(reviews.vote) , 2) AS avg_vote FROM movies 
+    LEFT JOIN  reviews ON movies.id = reviews.movie_id GROUP BY movies.id`;
+    const sqlReview = 'SELECT * FROM reviews WHERE movie_id= ?';
 
     connection.query(sqlMovies, [id], (err, moviesResults) => {
 
@@ -38,14 +37,14 @@ const show = (req, res) => {
         if (moviesResults.length === 0) {
             return res.status(404).json({ error: 'Movie not found' });
         } else {
-            const imgstringPath = `${req.imagePath}${moviesResults[0].title.toLowerCase().replace(" ", "_")}.jpg`
+
             connection.query(sqlReview, [id], (err, reviewsResults) => {
 
-
+                
                 res.json({
                     data: {
                         ...moviesResults[0],
-                        image: imgstringPath,
+                        image: `${req.imagePath}${moviesResults[0].image}`,
                         reviews: reviewsResults,
                     },
                 });
