@@ -2,12 +2,27 @@ import connection from "../db.js";
 
 const index = (req, res) => {
 
+    const search = req.query.search
 
 
-    const sql = `SELECT movies.* , ROUND(AVG(reviews.vote) , 2) AS avg_vote FROM movies 
-    LEFT JOIN  reviews ON movies.id = reviews.movie_id GROUP BY movies.id`;
 
-    connection.query(sql, (err, results) => {
+    let sql = `SELECT movies.* , ROUND(AVG(reviews.vote) , 2) AS avg_vote 
+    FROM movies 
+    LEFT JOIN  reviews ON movies.id = reviews.movie_id  `;
+    const params = [];
+
+    if (search !== undefined) {
+        sql += `
+      WHERE movies.title LIKE ?
+    `;
+        params.push(`%${search}%`);
+    }
+
+    sql += ` GROUP BY movies.id`
+
+
+    
+    connection.query(sql, params, (err, results) => {
 
         const movies = results.map((curMovie) => {
             return {
