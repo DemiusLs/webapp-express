@@ -1,3 +1,4 @@
+import slugify from "slugify";
 import connection from "../db.js";
 
 const index = (req, res) => {
@@ -78,11 +79,80 @@ const show = (req, res) => {
 }
 
 const store = (req, res) => {
+    console.log("Creo movie")
 
-    res.json(
-        "risposta da store"
-    )
+    const { title, director, abstract } = req.body;
+
+    console.log(title, director, abstract);
+
+    const slug = slugify(title, {
+        lower: true,
+        strinct: true,
+    });
+
+    const sql = `
+     INSERT INTO movies (slug, title, director, abstract)
+     VALUES (?, ?, ?, ?);
+   `;
+
+    console.log(sql);
+
+    // Eseguiamo la query
+    connection.query(sql, [slug, title, director, abstract], (err, results) => {
+        //  Se c'è errore lo giestiamo
+
+        //  Invio la risposta con il codie 201 e id e slug
+        return res.status(201).json({
+            id: results.insertId,
+            slug,
+        });
+    });
+};
+
+const storeReview = (req, res) => {
+
+    const { id } = req.params;
+
+    const movieSql = `SELECT * 
+    FROM movies
+    WHERE movies.id = ?
+    `
+
+    connection.query(sql, [id], (err, moviesResults) => {
+        if (bookResults.length === 0) {
+            return res.status(404).json({
+                error: "Libro non trovato",
+            });
+        }
+
+        const { name, vote, text } = req.body;
+
+        console.log(name, vote, text)
+
+
+        const newReviewSql = ` INSERT INTO reviews(book_id , name , vote ,text)
+        VALUES (? , ? , ? , ?)`;
+
+
+        connection.query(newReviewSql, [id, name, vote, text], (err, results) => {
+
+            if (err) {
+                return next(new Error(err));
+            }
+
+            return res.status(201).json({
+                message: "Review created",
+                id: results.insertId
+            })
+
+        })
+    })
+
+
 }
+
+
+
 
 const update = (req, res) => {
 
@@ -101,4 +171,4 @@ const destroy = (req, res) => {
 }
 
 
-export default { index, show, store, update, destroy }
+export default { index, show, store, storeReview, update, destroy }
