@@ -21,13 +21,13 @@ const index = (req, res) => {
     sql += ` GROUP BY movies.id`
 
 
-    
+
     connection.query(sql, params, (err, results) => {
 
         const movies = results.map((curMovie) => {
             return {
                 ...curMovie,
-                image: curMovie.image ? `${req.imagePath}${curMovie.image}` : null
+                image: curMovie.image ? `${req.imagePath}/${curMovie.image}` : null
             }
         })
 
@@ -39,12 +39,12 @@ const index = (req, res) => {
 
 const show = (req, res) => {
 
-    const id = req.params.id
+    const slug = req.params.slug
     const sqlMovies = `SELECT movies.* , ROUND(AVG(reviews.vote) , 2) AS avg_vote FROM movies 
-    LEFT JOIN  reviews ON movies.id = reviews.movie_id WHERE movies.id = ? GROUP BY movies.id`;
+    LEFT JOIN  reviews ON movies.id = reviews.movie_id WHERE movies.slug = ? GROUP BY movies.id`;
     const sqlReview = 'SELECT * FROM reviews WHERE movie_id= ?';
 
-    connection.query(sqlMovies, [id], (err, moviesResults) => {
+    connection.query(sqlMovies, [slug], (err, moviesResults) => {
 
 
 
@@ -53,13 +53,16 @@ const show = (req, res) => {
             return res.status(404).json({ error: 'Movie not found' });
         } else {
 
-            connection.query(sqlReview, [id], (err, reviewsResults) => {
+            const movieData = moviesResults[0]
 
+            connection.query(sqlReview, [movieData.id], (err, reviewsResults) => {
+
+                console.log()
 
                 res.json({
                     data: {
-                        ...moviesResults[0],
-                        image: moviesResults[0].image ? `${req.imagePath}${moviesResults[0].image}` : null,
+                        ...movieData,
+                        image: movieData.image ? `${req.imagePath}/${movieData.image}` : null,
                         reviews: reviewsResults,
                     },
                 });

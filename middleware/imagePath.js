@@ -1,9 +1,9 @@
 
-const imagePath =(req, res, next ) =>{
+const imagePath = (req, res, next) => {
 
-    
-    req.imagePath = `${req.protocol}://${req.get("host")}/images/movies/`;
-    
+
+    req.imagePath = `${req.protocol}://${req.get("host")}/images/movies`;
+
     next();
 
 }

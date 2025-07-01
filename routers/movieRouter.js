@@ -10,7 +10,7 @@ router.get("/", movieController.index)
 
 //SHOW 
 //lettura di un elemento singolo
-router.get("/:id", movieController.show)
+router.get("/:slug", movieController.show)
 
 
 //STORE
