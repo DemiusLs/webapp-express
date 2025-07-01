@@ -109,7 +109,7 @@ const store = (req, res) => {
     });
 };
 
-const storeReview = (req, res) => {
+const storeReview = (req, res, next) => {
 
     const { id } = req.params;
 
@@ -118,10 +118,12 @@ const storeReview = (req, res) => {
     WHERE movies.id = ?
     `
 
-    connection.query(sql, [id], (err, moviesResults) => {
-        if (bookResults.length === 0) {
+    console.log("storing")
+
+    connection.query(movieSql, [id], (err, moviesResults) => {
+        if (moviesResults.length === 0) {
             return res.status(404).json({
-                error: "Libro non trovato",
+                error: "Movie non trovato",
             });
         }
 
@@ -130,7 +132,7 @@ const storeReview = (req, res) => {
         console.log(name, vote, text)
 
 
-        const newReviewSql = ` INSERT INTO reviews(book_id , name , vote ,text)
+        const newReviewSql = ` INSERT INTO reviews(movie_id , name , vote ,text)
         VALUES (? , ? , ? , ?)`;
 
 
