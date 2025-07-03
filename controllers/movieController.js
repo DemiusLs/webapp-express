@@ -1,6 +1,6 @@
 import slugify from "slugify";
 import connection from "../db.js";
-
+import fs from "fs";
 const index = (req, res) => {
 
     const search = req.query.search
@@ -78,10 +78,47 @@ const show = (req, res) => {
 
 }
 
-const store = (req, res) => {
+const validateRequest = (req) => {
+
+
+    const { title, director, abstract } = req.body;
+
+    console.log(title, director, abstract)
+    if (!title || !director) {
+        return false;
+    }
+    if (title.length < 4 || director.length < 4 || abstract.length < 20) {
+        return false;
+    }
+
+    return true;
+};
+
+
+const store = (req, res, next) => {
+
+
+    // controllo i dati
+    if (!validateRequest(req)) {
+        return res.status(400).json({
+            message: "Dati errati",
+        });
+    }
+    console.log(validateRequest(req));
+
     console.log("Creo movie")
 
     const { title, director, abstract } = req.body;
+
+    let image = null
+
+    if (req.file) {
+        image = req.file.filename
+    }
+
+
+
+
 
     console.log(title, director, abstract);
 
@@ -91,15 +128,18 @@ const store = (req, res) => {
     });
 
     const sql = `
-     INSERT INTO movies (slug, title, director, abstract)
-     VALUES (?, ?, ?, ?);
+     INSERT INTO movies (slug, title, director, abstract, image)
+     VALUES (?, ?, ?, ?, ?);
    `;
 
-    console.log(sql);
+
 
     // Eseguiamo la query
-    connection.query(sql, [slug, title, director, abstract], (err, results) => {
-        //  Se c'è errore lo giestiamo
+    connection.query(sql, [slug, title, director, abstract, image], (err, results) => {
+        //  Se c'è errore lo gestiamo
+        if (err) {
+            return next(new Error(err));
+        }
 
         //  Invio la risposta con il codie 201 e id e slug
         return res.status(201).json({

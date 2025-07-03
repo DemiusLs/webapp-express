@@ -1,5 +1,6 @@
 import express from "express"
 import movieController from "../controllers/movieController.js";
+import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
@@ -15,13 +16,8 @@ router.get("/:slug", movieController.show)
 
 //STORE
 //inserisco un nuovo movie
-router.post('/', movieController.store)
+router.post('/', upload.single("image"), movieController.store)
 router.post('/:id/reviews', movieController.storeReview)
-
-
-//UPDATE
-//modifico un elemento
-router.put("/:id", movieController.update)
 
 
 //DELETE
